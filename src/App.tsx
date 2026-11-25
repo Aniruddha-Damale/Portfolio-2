@@ -134,7 +134,20 @@ function PortfolioApp() {
 
   const handleMoveSection = async (sectionKey: string, direction: 'up' | 'down') => {
     if (!portfolio || !isAdmin) return;
+    const defaults = [
+      'home',
+      'about',
+      'education',
+      'skills',
+      'projects',
+      'certificates',
+      'resume',
+      'contact',
+    ];
     const order = [...portfolio.settings.sectionOrder];
+    for (const key of defaults) {
+      if (!order.includes(key)) order.push(key);
+    }
     const idx = order.indexOf(sectionKey);
     const swap = direction === 'up' ? idx - 1 : idx + 1;
     if (idx <= 0 || swap <= 0 || swap >= order.length) return;

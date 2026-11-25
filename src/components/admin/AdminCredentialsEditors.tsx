@@ -236,6 +236,16 @@ export function EducationManagerEditor({
                 type="text"
                 value={achInput}
                 onChange={(e) => setAchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const v = achInput.trim();
+                    if (v) {
+                      setEditing({ ...editing, achievements: [...editing.achievements, v] });
+                      setAchInput('');
+                    }
+                  }
+                }}
                 placeholder="Add achievement or academic highlight"
                 className="flex-1 px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950"
               />
@@ -321,7 +331,10 @@ export function EducationManagerEditor({
               </button>
               <button
                 type="button"
-                onClick={() => setEditing({ ...edu })}
+                onClick={() => {
+                  setEditing({ ...edu });
+                  setAchInput('');
+                }}
                 className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 text-blue-600"
               >
                 <Pencil className="w-4 h-4" />
@@ -872,7 +885,11 @@ export function ResumeManagerEditor({
               Live PDF Preview
             </span>
             <a
-              href={`${form.fileUrl}?download=1`}
+              href={
+                form.fileUrl.startsWith('/api/files/') && !form.fileUrl.includes('download=1')
+                  ? `${form.fileUrl}${form.fileUrl.includes('?') ? '&' : '?'}download=1`
+                  : form.fileUrl
+              }
               download={form.fileName || 'resume.pdf'}
               className="inline-flex items-center gap-1.5 text-xs font-semibold accent-text hover:underline"
             >

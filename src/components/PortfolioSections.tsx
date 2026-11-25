@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
@@ -346,16 +346,16 @@ function ProjectShowcaseCard({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.22 }}
-              className="w-full h-full p-6 sm:p-8 flex flex-col justify-between bg-[#f2f2f2]"
+              className="w-full h-full px-5 sm:px-6 pt-5 pb-16 overflow-y-auto flex flex-col justify-between gap-2 bg-[#f2f2f2]"
             >
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#838282]">
                   Architecture &amp; Capability Matrix
                 </p>
-                <h4 className="mt-2 text-2xl swiss-heading uppercase text-[#111111]">
+                <h4 className="mt-1.5 text-xl sm:text-2xl swiss-heading uppercase text-[#111111]">
                   {project.title}
                 </h4>
-                <ul className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-sm text-[#111111]">
+                <ul className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm text-[#111111]">
                   {project.features.map((feat, idx) => (
                     <li key={idx} className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-[#111111] shrink-0 mt-0.5" strokeWidth={1.5} />
@@ -596,6 +596,18 @@ export function PortfolioSections({
   const [selectedProject, setSelectedProject] = useState<ProjectData | null>(null);
   const [qrProject, setQrProject] = useState<ProjectData | null>(null);
 
+  useEffect(() => {
+    if (!qrProject && !selectedProject) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (qrProject) setQrProject(null);
+        else if (selectedProject) setSelectedProject(null);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [qrProject, selectedProject]);
+
   const [copiedEmail, setCopiedEmail] = useState(false);
 
   const [contactName, setContactName] = useState('');
@@ -691,6 +703,25 @@ export function PortfolioSections({
       setCopiedEmail(true);
       window.setTimeout(() => setCopiedEmail(false), 2200);
     } catch {
+      try {
+        const el = document.createElement('textarea');
+        el.value = email;
+        el.setAttribute('readonly', '');
+        el.style.position = 'fixed';
+        el.style.opacity = '0';
+        document.body.appendChild(el);
+        el.focus();
+        el.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(el);
+        if (ok) {
+          setCopiedEmail(true);
+          window.setTimeout(() => setCopiedEmail(false), 2200);
+          return;
+        }
+      } catch {
+        // Fallback unavailable
+      }
       setCopiedEmail(false);
     }
   };
@@ -1522,7 +1553,11 @@ export function PortfolioSections({
                       <>
                         <MagneticWrap>
                           <a
-                            href={`${resume.fileUrl}?download=1`}
+                            href={
+                              resume.fileUrl.startsWith('/api/files/') && !resume.fileUrl.includes('download=1')
+                                ? `${resume.fileUrl}${resume.fileUrl.includes('?') ? '&' : '?'}download=1`
+                                : resume.fileUrl
+                            }
                             download={resume.fileName || 'Aniruddha_Damale_Resume.pdf'}
                             className="swiss-pill-btn-solid inline-flex items-center gap-2 px-6 py-3 text-xs whitespace-nowrap"
                           >

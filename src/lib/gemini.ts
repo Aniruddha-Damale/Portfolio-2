@@ -110,7 +110,23 @@ export async function runPortfolioChat(
   const model = fastMode ? 'gemini-3.1-flash-lite' : 'gemini-4-hydrogen';
   const systemInstruction = buildPortfolioContext(portfolio);
 
-  const formattedHistory = history.slice(-16).map((turn) => ({
+  const normalizedTurns: ChatTurn[] = [];
+  for (const turn of history.slice(-16)) {
+    const cleaned = turn.text.trim();
+    if (!cleaned) continue;
+    if (normalizedTurns.length === 0 && turn.role !== 'user') continue;
+    const prev = normalizedTurns[normalizedTurns.length - 1];
+    if (prev && prev.role === turn.role) {
+      prev.text = `${prev.text}\n${cleaned}`;
+    } else {
+      normalizedTurns.push({ role: turn.role, text: cleaned });
+    }
+  }
+  if (normalizedTurns.length > 0 && normalizedTurns[normalizedTurns.length - 1].role === 'user') {
+    normalizedTurns.pop();
+  }
+
+  const formattedHistory = normalizedTurns.map((turn) => ({
     role: turn.role,
     parts: [{ text: turn.text }],
   }));

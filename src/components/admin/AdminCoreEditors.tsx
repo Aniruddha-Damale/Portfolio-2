@@ -460,6 +460,16 @@ export function AboutMeEditor({
               type="text"
               value={newInterest}
               onChange={(e) => setNewInterest(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  const v = newInterest.trim();
+                  if (v && !interests.includes(v)) {
+                    setInterests([...interests, v]);
+                    setNewInterest('');
+                  }
+                }
+              }}
               placeholder="Add area of interest (e.g., Cloud Computing)"
               className="flex-1 px-3.5 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950"
             />

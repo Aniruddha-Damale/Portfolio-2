@@ -162,7 +162,13 @@ export function HeroChoreography({
               {profile.showSecondaryCta && (
                 <MagneticWrap>
                   <a
-                    href={resume.fileUrl ? `${resume.fileUrl}?download=1` : '#resume'}
+                    href={
+                      resume.fileUrl
+                        ? resume.fileUrl.startsWith('/api/files/')
+                          ? `${resume.fileUrl}?download=1`
+                          : resume.fileUrl
+                        : '#resume'
+                    }
                     download={
                       resume.fileUrl
                         ? resume.fileName || 'Aniruddha_Damale_Resume.pdf'

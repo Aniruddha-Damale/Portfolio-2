@@ -25,6 +25,8 @@ export function Navbar({ settings, resume }: NavbarProps) {
     label: settings.navLabels?.[key] || key.charAt(0).toUpperCase() + key.slice(1),
   }));
 
+  const visibleKeySignature = visibleLinks.map((l) => l.key).join(',');
+
   useEffect(() => {
     const ids = ['home', ...visibleLinks.map((l) => l.key), 'experience', 'certificates', 'resume'];
     const observer = new IntersectionObserver(
@@ -44,16 +46,25 @@ export function Navbar({ settings, resume }: NavbarProps) {
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
-  }, [visibleLinks.length]);
+  }, [visibleKeySignature]);
 
-  const resumeHref = resume.fileUrl ? `${resume.fileUrl}?download=1` : '#resume';
+  const resumeHref = resume.fileUrl
+    ? resume.fileUrl.startsWith('/api/files/')
+      ? `${resume.fileUrl}?download=1`
+      : resume.fileUrl
+    : '#resume';
+  const showCertificatesLink = settings.sectionVisibility?.certificates !== false;
 
   return (
     <header className="sticky top-0 z-40 h-20 bg-[#f2f2f2]/90 backdrop-blur-[12px] border-b border-[#1e1e1e]/12">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-4 sm:gap-8">
         {/* Zone 1: Brand Wordmark with Circular AD Monogram */}
         <a
           href="#home"
+          onClick={() => {
+            setActiveKey('home');
+            setMobileOpen(false);
+          }}
           className="inline-flex items-center gap-3 text-sm font-display font-bold tracking-[-0.03em] uppercase text-[#111111] whitespace-nowrap shrink-0 hover:text-[#838282] transition-colors duration-[120ms]"
         >
           {settings.logoUrl ? (
@@ -102,25 +113,28 @@ export function Navbar({ settings, resume }: NavbarProps) {
 
         {/* Zone 3: Pill-Shaped Primary CTA Button (1px solid #1e1e1e -> inverts on hover) */}
         <div className="flex items-center gap-3 shrink-0">
-          <MagneticWrap className="hidden sm:inline-block">
-            <a
-              href={resumeHref}
-              download={resume.fileUrl ? resume.fileName || 'Aniruddha_Damale_Resume.pdf' : undefined}
-              className="swiss-pill-btn group inline-flex items-center gap-2 px-5 py-2.5 text-[12px] whitespace-nowrap shrink-0"
-            >
-              <span>{settings.navLabels?.resume || 'RESUME'}</span>
-              <ArrowRight
-                className="w-3.5 h-3.5 transition-transform duration-150 group-hover:translate-x-0.5"
-                strokeWidth={1.5}
-              />
-            </a>
-          </MagneticWrap>
+          <div className="hidden sm:inline-block">
+            <MagneticWrap>
+              <a
+                href={resumeHref}
+                download={resume.fileUrl ? resume.fileName || 'Aniruddha_Damale_Resume.pdf' : undefined}
+                className="swiss-pill-btn group inline-flex items-center gap-2 px-5 py-2.5 text-[12px] whitespace-nowrap shrink-0"
+              >
+                <span>{settings.navLabels?.resume || 'RESUME'}</span>
+                <ArrowRight
+                  className="w-3.5 h-3.5 transition-transform duration-150 group-hover:translate-x-0.5"
+                  strokeWidth={1.5}
+                />
+              </a>
+            </MagneticWrap>
+          </div>
 
           <button
             type="button"
             onClick={() => setMobileOpen((prev) => !prev)}
             className="md:hidden w-10 h-10 rounded-full border border-[#1e1e1e]/20 inline-flex items-center justify-center text-[#111111] hover:border-[#1e1e1e] transition-colors"
             aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? (
               <X className="w-4 h-4" strokeWidth={1.5} />
@@ -140,7 +154,10 @@ export function Navbar({ settings, resume }: NavbarProps) {
             <a
               key={item.key}
               href={item.href}
-              onClick={() => setMobileOpen(false)}
+              onClick={() => {
+                setActiveKey(item.key);
+                setMobileOpen(false);
+              }}
               className="block px-3 py-2.5 text-[14px] font-bold uppercase tracking-[0.08em] text-[#111111] hover:text-[#b6b5b5] transition-colors duration-[120ms]"
             >
               {item.label}
@@ -153,15 +170,18 @@ export function Navbar({ settings, resume }: NavbarProps) {
           >
             Experience
           </a>
-          <a
-            href="#certificates"
-            onClick={() => setMobileOpen(false)}
-            className="block px-3 py-2.5 text-[14px] font-bold uppercase tracking-[0.08em] text-[#111111] hover:text-[#b6b5b5] transition-colors duration-[120ms]"
-          >
-            Certifications
-          </a>
+          {showCertificatesLink && (
+            <a
+              href="#certificates"
+              onClick={() => setMobileOpen(false)}
+              className="block px-3 py-2.5 text-[14px] font-bold uppercase tracking-[0.08em] text-[#111111] hover:text-[#b6b5b5] transition-colors duration-[120ms]"
+            >
+              {settings.navLabels?.certificates || 'Certifications'}
+            </a>
+          )}
           <a
             href={resumeHref}
+            download={resume.fileUrl ? resume.fileName || 'Aniruddha_Damale_Resume.pdf' : undefined}
             onClick={() => setMobileOpen(false)}
             className="swiss-pill-btn-solid block mt-3 px-5 py-3 text-[12px] text-center"
           >

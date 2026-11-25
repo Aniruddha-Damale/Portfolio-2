@@ -35,13 +35,23 @@ export function ChatAssistant({ ownerName }: { ownerName: string }) {
     }
   }, [messages, open, sending]);
 
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [open]);
+
   const sendMessage = async (textOverride?: string) => {
     const text = (textOverride ?? input).trim();
     if (!text || sending) return;
 
     setError(null);
-    const historyToSend = messages.slice(1);
-    const nextMessages: ChatMessage[] = [...messages, { role: 'user', text }];
+    const prevMessages = messages;
+    const historyToSend = prevMessages.slice(1);
+    const nextMessages: ChatMessage[] = [...prevMessages, { role: 'user', text }];
     setMessages(nextMessages);
     if (!textOverride) setInput('');
     setSending(true);
@@ -57,6 +67,8 @@ export function ChatAssistant({ ownerName }: { ownerName: string }) {
       });
       setMessages((prev) => [...prev, { role: 'model', text: data.reply }]);
     } catch (err: any) {
+      setMessages(prevMessages);
+      if (!textOverride) setInput(text);
       setError(err.message || 'Unable to reach the portfolio assistant right now.');
     } finally {
       setSending(false);

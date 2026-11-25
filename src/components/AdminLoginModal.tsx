@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Lock, LogOut, ShieldAlert, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.tsx';
 
@@ -15,6 +15,15 @@ export function AdminLoginModal({
 }: AdminLoginModalProps) {
   const { firebaseUser, authInfo, authError, signInWithGoogle, logout, clearAuthError } = useAuth();
   const [signingIn, setSigningIn] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !signingIn) onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [open, signingIn, onClose]);
 
   if (!open) return null;
 
@@ -34,8 +43,14 @@ export function AdminLoginModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="admin-login-heading"
+      onClick={() => {
+        if (!signingIn) onClose();
+      }}
     >
-      <div className="bg-[#f2f2f2] border border-[#1e1e1e] rounded-[2px] max-w-md w-full p-6 sm:p-7">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-[#f2f2f2] border border-[#1e1e1e] rounded-[2px] max-w-md w-full p-6 sm:p-7"
+      >
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-[#1e1e1e]/12">
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-[2px] border border-[#1e1e1e]/20 bg-white text-[#111111] flex items-center justify-center shrink-0">

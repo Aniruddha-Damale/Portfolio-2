@@ -221,7 +221,13 @@ async function startServer() {
   const contactSchema = z.object({
     name: z.string().trim().min(2, 'Please enter your name').max(120),
     email: z.string().trim().email('Please enter a valid email address').max(200),
-    subject: z.string().trim().min(2, 'Please enter a subject').max(200),
+    subject: z
+      .string()
+      .trim()
+      .max(200)
+      .optional()
+      .default('')
+      .transform((v) => v || 'Portfolio Inquiry'),
     message: z.string().trim().min(10, 'Message should be at least 10 characters').max(4000),
   });
 
@@ -1033,6 +1039,7 @@ async function startServer() {
   app.use('/videos', express.static(path.resolve(__dirname, 'public/videos')));
   app.use('/certificates', express.static(path.resolve(__dirname, 'public/certificates')));
   app.use('/assets/aistudio', express.static(path.resolve(__dirname, 'public/assets/aistudio')));
+  app.use('/src/assets/images', express.static(path.resolve(__dirname, 'src/assets/images')));
 
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');

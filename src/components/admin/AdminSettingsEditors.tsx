@@ -887,7 +887,7 @@ export function WebsiteSettingsEditor({
   const moveSection = (index: number, dir: 'up' | 'down') => {
     const next = [...form.sectionOrder];
     const swap = dir === 'up' ? index - 1 : index + 1;
-    if (swap < 0 || swap >= next.length) return;
+    if (index <= 0 || swap <= 0 || swap >= next.length) return;
     [next[index], next[swap]] = [next[swap], next[index]];
     setForm({ ...form, sectionOrder: next });
   };
@@ -1046,7 +1046,7 @@ export function WebsiteSettingsEditor({
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
-                    disabled={idx === 0 || key === 'home'}
+                    disabled={idx <= 1 || key === 'home'}
                     onClick={() => moveSection(idx, 'up')}
                     className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30"
                   >
