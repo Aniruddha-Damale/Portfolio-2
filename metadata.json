@@ -1,0 +1,8 @@
+{
+  "name": "DevPortfolio — Personal Developer Portfolio",
+  "description": "A modern, database-backed personal developer portfolio website with a complete Admin Dashboard, live Edit Website mode, file management, and Gemini portfolio assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
